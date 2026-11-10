@@ -1,10 +1,13 @@
 name: Collecte des annonces
 
+# Le raccourci iPhone dépose les pages Leboncoin dans la publication « boite », puis déclenche ce traitement.
 on:
+  repository_dispatch:
+    types: [collecte]
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['outils/collect.mjs', '.github/workflows/collecte.yml']
+    paths: ['.github/workflows/collecte.yml']
 
 permissions:
   contents: write
@@ -16,20 +19,32 @@ concurrency:
 jobs:
   collecte:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Installer l'outil de photos
-        run: npm install --no-save --no-audit --no-fund sharp@0.33.5
-      - name: Collecter Leboncoin
-        run: node outils/collect.mjs donnees.json
-      - name: Chiffrer les annonces
-        run: node outils/encrypt.mjs outils/keys.json donnees.json data.enc.json
-      - name: Publier
+      - name: Préparer la boîte de dépôt
         run: |
+          gh release view boite >/dev/null 2>&1 || gh release create boite --title "Boîte de dépôt" --notes "Pages déposées par le raccourci iPhone, supprimées après traitement." --prerelease
+          echo "Identifiant de la boîte : $(gh api repos/$GITHUB_REPOSITORY/releases/tags/boite --jq .id)" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Récupérer les pages
+        if: github.event_name != 'push'
+        run: |
+          mkdir -p boite
+          gh release download boite -p '*.html' -D boite || true
+          ls boite | wc -l
+      - name: Lire les annonces
+        id: lire
+        if: github.event_name != 'push'
+        run: node outils/parse.mjs boite donnees.json
+      - name: Chiffrer et publier
+        if: github.event_name != 'push' && steps.lire.outcome == 'success'
+        run: |
+          node outils/encrypt.mjs outils/keys.json donnees.json data.enc.json
           rm -f donnees.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -37,3 +52,7 @@ jobs:
           git diff --cached --quiet && echo "Rien de nouveau" && exit 0
           git commit -m "Annonces mises à jour"
           git push
+      - name: Vider la boîte
+        if: always() && github.event_name != 'push'
+        run: |
+          for a in $(gh release view boite --json assets --jq '.assets[].name'); do gh release delete-asset boite "$a" -y; done

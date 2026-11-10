@@ -184,7 +184,7 @@ const STYLE_WORD = { "60": "années 60", "70": "années 70", "80": "années 80",
 const SELENCY = { buffet: "meuble-de-rangement/buffet", enfilade: "meuble-de-rangement/enfilade", commode: "meuble-de-rangement/commode", console: "table/console" };
 
 const COLLECTED = RAW.collected;
-const ADS = RAW.ads.map((a) => ({ id: String(a.id), price: a.p || 0, city: a.c, km: a.km, date: a.d, pro: a.o === "pro", types: a.ty, styles: a.st, title: a.t, img: /^data:image\/webp;base64,/.test(a.img || "") ? a.img : "" }));
+const ADS = RAW.ads.map((a) => ({ id: String(a.id), price: a.p || 0, city: a.c, km: a.km, date: a.d, pro: a.o === "pro", types: a.ty, styles: a.st, title: a.t, img: /^(data:image\/webp;base64,|https:\/\/img\.leboncoin\.fr\/)/.test(a.img || "") ? a.img : "" }));
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
@@ -241,7 +241,7 @@ function render() {
   res.slice(0, shown).forEach((a) => {
     const li = el("li", { class: "ad" });
     const link = el("a", { href: "https://www.leboncoin.fr/ad/ameublement/" + a.id, target: "_blank", rel: "noopener" });
-    if (a.img) { const im = el("img", { class: "ph", alt: "", loading: "lazy", width: "84", height: "84" }); im.src = a.img; link.appendChild(im); }
+    if (a.img) { const im = el("img", { class: "ph", alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer", width: "84", height: "84" }); im.src = a.img; link.appendChild(im); }
     else link.appendChild(el("span", { class: "ph" }));
     link.appendChild(el("span", { class: "t" }, a.title));
     link.appendChild(el("span", { class: "p" }, a.price > 0 ? a.price.toLocaleString("fr-FR") + " €" : "Prix à voir"));
