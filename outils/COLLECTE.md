@@ -7,6 +7,7 @@
    - `sel.js` → https://www.selency.fr/c/meubles/meuble-de-rangement/buffet
    - `emm.js` → https://www.label-emmaus.co/fr/catalogue/?q=buffet
    Exécuter le contenu du script (javascript_tool), suivre avec `etat.js` jusqu'à « fini », puis `export.js`
-   (télécharge `chineuse-<site>.json` dans ~/Downloads).
-3. Récupérer les fichiers de ~/Downloads, lancer `outils/publier.sh <dossier>`.
+   (télécharge `chineuse-<site>-<AAAAMMJJhhmm>.json` dans ~/Downloads).
+3. Pour chaque site, récupérer le fichier exporté pendant CETTE exécution (le plus récent), le copier dans un
+   dossier de travail sous le nom `chineuse-<site>.json`, puis lancer `outils/publier.sh <dossier>`.
 4. Leboncoin est obligatoire (≥ 30 annonces). Les autres sites sont facultatifs : s'ils échouent, on publie sans eux.
