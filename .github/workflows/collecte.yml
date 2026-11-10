@@ -1,0 +1,39 @@
+name: Collecte des annonces
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['outils/collect.mjs', '.github/workflows/collecte.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collecte
+  cancel-in-progress: false
+
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Installer l'outil de photos
+        run: npm install --no-save --no-audit --no-fund sharp@0.33.5
+      - name: Collecter Leboncoin
+        run: node outils/collect.mjs donnees.json
+      - name: Chiffrer les annonces
+        run: node outils/encrypt.mjs outils/keys.json donnees.json data.enc.json
+      - name: Publier
+        run: |
+          rm -f donnees.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.enc.json
+          git diff --cached --quiet && echo "Rien de nouveau" && exit 0
+          git commit -m "Annonces mises à jour"
+          git push
