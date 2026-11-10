@@ -1,8 +1,6 @@
 <title>La Chineuse</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Righteous&display=swap">
 <style>
-/* Layout : une colonne pour le pouce. Filtres en pastilles, puis une seule liste d'annonces ; le prix est aligné à droite pour se comparer d'un coup d'œil. */
+/* Layout : une colonne pour le pouce (deux sur grand écran). Filtres en pastilles, puis des cartes à grande photo défilante ; un toucher ouvre la fiche complète en plein écran. */
 :root {
   --bg: #EEF4F1;
   --surface: #FFFFFF;
@@ -13,25 +11,26 @@
   --accent-fg: #2A2204;
   --teak: #99582A;        /* teck */
   --new: #2F7D62;
+  --scrim: rgba(10, 22, 19, .55);
   --font-display: "Righteous", "Trebuchet MS", system-ui, sans-serif;
   --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0F1E1B; --surface: #172A26; --fg: #E4EEEA; --muted: #9DB3AD; --line: #2B423D;
-    --accent: #EFBE3E; --accent-fg: #231C03; --teak: #D9945E; --new: #6FC7A6;
+    --accent: #EFBE3E; --accent-fg: #231C03; --teak: #D9945E; --new: #6FC7A6; --scrim: rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0F1E1B; --surface: #172A26; --fg: #E4EEEA; --muted: #9DB3AD; --line: #2B423D;
-  --accent: #EFBE3E; --accent-fg: #231C03; --teak: #D9945E; --new: #6FC7A6;
+  --accent: #EFBE3E; --accent-fg: #231C03; --teak: #D9945E; --new: #6FC7A6; --scrim: rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.4; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.4; -webkit-tap-highlight-color: transparent; }
 .wrap {
-  max-width: 680px; margin: 0 auto;
+  max-width: 980px; margin: 0 auto;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 20px 48px;
@@ -40,14 +39,16 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font-body); f
 header h1 { font-family: var(--font-display); font-weight: 400; font-size: 2.1rem; line-height: 1.05; margin: 0; }
 header h1 span { color: var(--teak); }
 header p { margin: 6px 0 0; color: var(--muted); font-size: .9rem; }
-.filters { display: flex; flex-direction: column; gap: 12px; }
+.filters { display: flex; flex-direction: column; gap: 12px; max-width: 680px; }
 h2 { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin: 0 0 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   font: inherit; font-size: .95rem; font-weight: 500; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer;
 }
+.chip small { color: var(--muted); font-weight: 500; margin-left: 4px; font-variant-numeric: tabular-nums; }
 .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 700; }
+.chip[aria-pressed="true"] small { color: var(--accent-fg); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .grid label { display: flex; flex-direction: column; gap: 4px; font-size: .82rem; color: var(--muted); min-width: 0; }
 input[type="number"], input[type="search"], select {
@@ -60,23 +61,75 @@ input[type="number"], input[type="search"], select {
 
 .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--fg); padding-bottom: 6px; }
 .head strong { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
-.head button { font: inherit; font-size: .85rem; background: none; border: 0; color: var(--teak); text-decoration: underline; cursor: pointer; min-height: 32px; padding: 0; }
-.list { list-style: none; margin: 0; padding: 0; }
-.ad { display: flex; align-items: stretch; border-bottom: 1.5px solid var(--line); }
-.ad a { flex: 1; min-width: 0; display: grid; grid-template-columns: 84px 1fr auto; align-content: center; gap: 2px 12px; padding: 10px 0; color: var(--fg); text-decoration: none; }
-.ad .ph { grid-row: 1 / span 2; width: 84px; height: 84px; border-radius: 8px; object-fit: cover; background: var(--line); display: block; }
-.ad .t { font-weight: 700; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.ad .p { font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-.ad .m { grid-column: 2 / -1; align-self: start; color: var(--muted); font-size: .85rem; }
-.ad .new { color: var(--new); font-weight: 700; }
-.ad .fav { font-size: 1.4rem; line-height: 1; background: none; border: 0; color: var(--muted); padding: 0 0 0 12px; min-width: 44px; cursor: pointer; }
-.ad .fav[aria-pressed="true"] { color: var(--teak); }
-.empty { border: 1.5px dashed var(--line); border-radius: 12px; padding: 18px; color: var(--muted); margin: 12px 0 0; }
-.more { font: inherit; font-weight: 700; min-height: 44px; border-radius: 10px; border: 1.5px solid var(--fg); background: transparent; color: var(--fg); cursor: pointer; width: 100%; margin-top: 12px; }
+.linkbtn { font: inherit; font-size: .85rem; background: none; border: 0; color: var(--teak); text-decoration: underline; cursor: pointer; min-height: 32px; padding: 0; }
+
+.list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 22px; }
+@media (min-width: 720px) { .list { grid-template-columns: 1fr 1fr; } }
+.card { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+
+/* galerie défilante : utilisée sur les cartes et dans la fiche */
+.gal { position: relative; border-radius: 14px; overflow: hidden; background: var(--line); }
+.track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; aspect-ratio: 4 / 3; max-width: 100%; }
+.track::-webkit-scrollbar { display: none; }
+.track img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; display: block; background: var(--line); }
+.track .none { flex: 0 0 100%; display: grid; place-items: center; color: var(--muted); font-size: .9rem; }
+.pill { position: absolute; font-size: .78rem; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: var(--scrim); color: #fff; pointer-events: none; font-variant-numeric: tabular-nums; }
+.pill.count { right: 10px; bottom: 10px; }
+.pill.src { left: 10px; top: 10px; }
+.heart { position: absolute; right: 8px; top: 8px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: var(--scrim); color: #fff; font-size: 1.35rem; line-height: 1; cursor: pointer; }
+.heart[aria-pressed="true"] { color: var(--accent); }
+
+.cardbody { all: unset; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; cursor: pointer; }
+.cardbody .t { font-weight: 700; font-size: 1.05rem; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cardbody .p, .price { font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.cardbody .m { grid-column: 1 / -1; color: var(--muted); font-size: .86rem; }
+.new { color: var(--new); font-weight: 700; }
+.empty { border: 1.5px dashed var(--line); border-radius: 12px; padding: 18px; color: var(--muted); margin: 0; }
+.more { font: inherit; font-weight: 700; min-height: 44px; border-radius: 10px; border: 1.5px solid var(--fg); background: transparent; color: var(--fg); cursor: pointer; width: 100%; margin-top: 16px; }
 .else { display: flex; flex-direction: column; gap: 8px; }
 .else .row { display: flex; flex-wrap: wrap; gap: 8px; }
 .site { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; background: var(--surface); border: 1.5px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 500; font-size: .92rem; }
 .note { color: var(--muted); font-size: .85rem; margin: 0; }
+
+/* fiche détaillée */
+.sheet { position: fixed; inset: 0; z-index: 20; background: var(--bg); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.bar {
+  position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--bg); border-bottom: 1.5px solid var(--line);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px));
+}
+.bar button { font: inherit; font-weight: 700; min-height: 48px; padding: 0 10px; background: none; border: 0; color: var(--fg); cursor: pointer; font-size: 1rem; }
+.bar .fav[aria-pressed="true"] { color: var(--teak); }
+.sheetin {
+  max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px calc(110px + env(safe-area-inset-bottom, 0px));
+}
+.sheet .gal { border-radius: 14px; }
+.thumbs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.thumbs::-webkit-scrollbar { display: none; }
+.thumbs button { flex: 0 0 56px; height: 56px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: var(--line); cursor: pointer; }
+.thumbs button[aria-current="true"] { border-color: var(--teak); }
+.thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.toprow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.sheet h3 { font-size: 1.3rem; line-height: 1.25; margin: 0; overflow-wrap: anywhere; text-wrap: balance; }
+.sheet .price { font-size: 1.5rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: .8rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--surface); border: 1.5px solid var(--line); }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0; padding: 14px 0; border-block: 1.5px solid var(--line); }
+.facts dt { color: var(--muted); font-size: .9rem; }
+.facts dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+.desc { white-space: pre-line; overflow-wrap: anywhere; line-height: 1.55; margin: 0; }
+.desc.clamp { display: -webkit-box; -webkit-line-clamp: 10; -webkit-box-orient: vertical; overflow: hidden; }
+.cta {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--bg); border-top: 1.5px solid var(--line);
+  padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.cta a { display: flex; align-items: center; justify-content: center; max-width: 720px; margin: 0 auto; min-height: 50px; border-radius: 12px; background: var(--accent); color: var(--accent-fg); font-weight: 700; text-decoration: none; }
+body.locked { overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .track { scroll-behavior: auto; } }
 </style>
 
 <div class="wrap">
@@ -94,10 +147,15 @@ input[type="number"], input[type="search"], select {
       <h2>Style ou époque</h2>
       <div class="chips" id="styles"></div>
     </div>
+    <div>
+      <h2>Site</h2>
+      <div class="chips" id="sources"></div>
+    </div>
     <div class="grid">
       <label for="zone">Zone
         <select id="zone">
-          <option value="all">Tout le secteur</option>
+          <option value="all">Partout (livraison incluse)</option>
+          <option value="near">Autour de Bordeaux</option>
           <option value="20">À moins de 20 km</option>
           <option value="10">À moins de 10 km</option>
           <option value="bdx">Bordeaux seulement</option>
@@ -120,133 +178,244 @@ input[type="number"], input[type="search"], select {
   <section>
     <div class="head">
       <strong id="count"></strong>
-      <button type="button" id="reset">Réinitialiser les filtres</button>
+      <button type="button" class="linkbtn" id="reset">Réinitialiser les filtres</button>
     </div>
     <ul class="list" id="list"></ul>
     <button type="button" class="more" id="more" hidden>Afficher plus d'annonces</button>
   </section>
 
   <section class="else">
-    <h2>Chercher aussi ailleurs</h2>
+    <h2>Pas encore dans l'appli</h2>
     <div class="row" id="else"></div>
     <p class="note" id="elseNote"></p>
   </section>
 
-  <p class="note">Les annonces viennent de Leboncoin, relevées à la date indiquée en haut. Une annonce peut avoir été vendue depuis. Le style est déduit du titre et de la description, il peut être approximatif.</p>
-</div>
+  <p class="note">Annonces relevées à la date indiquée en haut : un meuble peut avoir été vendu depuis. Le style est déduit du titre et de la description, il peut être approximatif.</p>
 
+  <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sTitle">
+    <div class="bar">
+      <button type="button" id="sClose">‹ Retour</button>
+      <button type="button" class="fav" id="sFav" aria-pressed="false">♡ Coup de cœur</button>
+    </div>
+    <div class="sheetin">
+      <div class="gal" id="sGal"></div>
+      <div class="thumbs" id="sThumbs"></div>
+      <div class="toprow"><span class="tags" id="sTags"></span><span class="price" id="sPrice"></span></div>
+      <h3 id="sTitle"></h3>
+      <dl class="facts" id="sFacts"></dl>
+      <div>
+        <h2>Description</h2>
+        <p class="desc clamp" id="sDesc"></p>
+        <button type="button" class="linkbtn" id="sMore" hidden>Lire toute la description</button>
+      </div>
+    </div>
+    <div class="cta"><a id="sLink" href="#" target="_blank" rel="noopener">Voir l'annonce</a></div>
+  </div>
+</div>
 <script type="application/json" id="data">__DATA__</script>
 
 <script>
+const RAW = JSON.parse(document.getElementById("data").textContent);
+const COLLECTED = RAW.collected;
 const TYPES = [["all", "Tous"], ["buffet", "Buffets"], ["enfilade", "Enfilades"], ["commode", "Commodes"], ["console", "Consoles"]];
 const STYLES = [["60", "Années 60"], ["70", "Années 70"], ["80", "Années 80"], ["sc", "Scandinave"], ["fo", "Formica"]];
 const STYLE_WORD = { "60": "années 60", "70": "années 70", "80": "années 80", sc: "scandinave", fo: "formica" };
-const SELENCY = { buffet: "meuble-de-rangement/buffet", enfilade: "meuble-de-rangement/enfilade", commode: "meuble-de-rangement/commode", console: "table/console" };
+const SRC = { lbc: { name: "Leboncoin", host: /^https:\/\/www\.leboncoin\.fr\// }, sel: { name: "Selency", host: /^https:\/\/www\.selency\.fr\// }, emm: { name: "Label Emmaüs", host: /^https:\/\/www\.label-emmaus\.co\// } };
+const IMG_OK = /^(https:\/\/(img\.leboncoin\.fr|images\.selency\.com|[a-z0-9.-]*label-emmaus\.co|[a-z0-9.-]*cloudfront\.net|[a-z0-9.-]*imgix\.net)\/[^"'<>\s]*|data:image\/webp;base64,[A-Za-z0-9+/=]+)$/;
 
-const RAW = JSON.parse(document.getElementById("data").textContent);
-const COLLECTED = RAW.collected;
-const ADS = RAW.ads.map((a) => ({ id: String(a.id), price: a.p || 0, city: a.c, km: a.km, date: a.d, pro: a.o === "pro", types: a.ty, styles: a.st, title: a.t, img: /^(data:image\/webp;base64,|https:\/\/img\.leboncoin\.fr\/)/.test(a.img || "") ? a.img : "" }));
+const ADS = (RAW.ads || []).map((a) => {
+  const src = SRC[a.src] ? a.src : "lbc";
+  const id = /^\d+$/.test(String(a.id)) ? "lbc-" + a.id : String(a.id);
+  const imgs = (a.imgs || (a.img ? [a.img] : [])).map(String).filter((u) => IMG_OK.test(u));
+  const url = typeof a.url === "string" && SRC[src].host.test(a.url) ? a.url : (src === "lbc" && /^lbc-\d+$/.test(id) ? "https://www.leboncoin.fr/ad/ameublement/" + id.slice(4) : "");
+  return { id, src, url, title: String(a.t || ""), price: parseInt(a.p, 10) || 0, city: a.c || "", zip: a.z || "", km: typeof a.km === "number" ? a.km : null, date: a.d || "", pro: a.o === "pro", seller: a.seller || "", types: a.ty || [], styles: a.st || [], imgs, desc: String(a.desc || ""), attrs: Array.isArray(a.attrs) ? a.attrs.filter((x) => Array.isArray(x) && x.length === 2).map((x) => [String(x[0]), String(x[1])]) : [], ship: a.ship || "" };
+});
+const BY_ID = new Map(ADS.map((a) => [a.id, a]));
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 };
-const DEFAULT = { type: "all", styles: [], zone: "all", pmax: "", sort: "date", q: "", priv: false, favOnly: false };
+const DEFAULT = { type: "all", styles: [], sources: [], zone: "all", pmax: "", sort: "date", q: "", priv: false, favOnly: false };
 let f = Object.assign({}, DEFAULT, store.get("chineuse.filters", {}));
-if (!["all", "20", "10", "bdx"].includes(f.zone)) f.zone = "all";
-let favs = store.get("chineuse.coeurs", []);
-let shown = 40;
+if (!["all", "near", "20", "10", "bdx"].includes(f.zone)) f.zone = "all";
+if (!Array.isArray(f.sources)) f.sources = [];
+let favs = store.get("chineuse.coeurs", []).map((x) => (/^\d+$/.test(String(x)) ? "lbc-" + x : String(x)));
+let shown = 24;
 const $ = (id) => document.getElementById(id);
 const el = (tag, props, text) => { const n = document.createElement(tag); if (props) for (const k in props) n.setAttribute(k, props[k]); if (text != null) n.textContent = text; return n; };
 const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 const frDate = (iso) => { const [y, m, d] = iso.split("-"); return d + "/" + m + "/" + y; };
 const daysOld = (iso) => Math.round((new Date(COLLECTED) - new Date(iso)) / 864e5);
+const euros = (n) => (n > 0 ? n.toLocaleString("fr-FR") + " €" : "Prix à voir");
+const isFav = (id) => favs.includes(id);
+function toggleFav(id) { const i = favs.indexOf(id); if (i >= 0) favs.splice(i, 1); else favs.push(id); store.set("chineuse.coeurs", favs); }
+function where(a) {
+  if (a.km != null) return a.city + (a.city !== "Bordeaux" ? " (" + a.km + " km)" : "");
+  return a.seller ? a.seller : a.ship || "Livraison";
+}
+
+function gallery(a, big) {
+  const g = el("div", { class: "gal" });
+  const track = el("div", { class: "track" });
+  if (!a.imgs.length) track.appendChild(el("div", { class: "none" }, "Pas de photo"));
+  a.imgs.forEach((u, i) => {
+    const im = el("img", { alt: i === 0 ? a.title : "", loading: i === 0 && big ? "eager" : "lazy", decoding: "async", referrerpolicy: "no-referrer", draggable: "false" });
+    im.addEventListener("error", () => { im.style.visibility = "hidden"; });
+    im.src = u; track.appendChild(im);
+  });
+  g.appendChild(track);
+  if (a.imgs.length > 1) {
+    const c = el("span", { class: "pill count" }, "1 / " + a.imgs.length);
+    let t = 0;
+    track.addEventListener("scroll", () => { cancelAnimationFrame(t); t = requestAnimationFrame(() => { const i = Math.round(track.scrollLeft / track.clientWidth); c.textContent = (i + 1) + " / " + a.imgs.length; g.dispatchEvent(new CustomEvent("slide", { detail: i })); }); }, { passive: true });
+    g.appendChild(c);
+  }
+  return { g, track };
+}
 
 function chips(boxId, items, isOn, onTap) {
   const box = $(boxId); box.textContent = "";
-  items.forEach(([key, label]) => {
+  items.forEach(([key, label, n]) => {
     const b = el("button", { type: "button", class: "chip", "aria-pressed": String(isOn(key)) }, label);
-    b.addEventListener("click", () => { onTap(key); shown = 40; render(); });
+    if (n != null) b.appendChild(el("small", null, String(n)));
+    b.addEventListener("click", () => { onTap(key); shown = 24; render(); });
     box.appendChild(b);
   });
 }
 
-function filtered() {
-  const q = norm(f.q.trim());
-  const max = parseInt(f.pmax, 10);
-  let out = ADS.filter((a) =>
-    (f.type === "all" || a.types.includes(f.type)) &&
+function matches(a, skipSource) {
+  const q = norm(f.q.trim()), max = parseInt(f.pmax, 10);
+  return (f.type === "all" || a.types.includes(f.type)) &&
     (!f.styles.length || f.styles.some((s) => a.styles.includes(s))) &&
-    (f.zone === "all" || (f.zone === "bdx" ? a.city === "Bordeaux" : a.km != null && a.km <= parseInt(f.zone, 10))) &&
+    (skipSource || !f.sources.length || f.sources.includes(a.src)) &&
+    (f.zone === "all" || (a.km != null && (f.zone === "near" || (f.zone === "bdx" ? a.city === "Bordeaux" : a.km <= parseInt(f.zone, 10))))) &&
     (!(max > 0) || a.price <= max) &&
     (!f.priv || !a.pro) &&
-    (!f.favOnly || favs.includes(a.id)) &&
-    (!q || norm(a.title + " " + a.city).includes(q)));
-  if (f.sort === "asc") out.sort((a, b) => a.price - b.price);
+    (!f.favOnly || isFav(a.id)) &&
+    (!q || norm(a.title + " " + a.city + " " + a.desc + " " + a.seller).includes(q));
+}
+
+function filtered() {
+  const out = ADS.filter((a) => matches(a, false));
+  if (f.sort === "asc") out.sort((a, b) => (a.price || 1e9) - (b.price || 1e9));
   else if (f.sort === "desc") out.sort((a, b) => b.price - a.price);
-  else out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  else out.sort((a, b) => (a.date === b.date ? 0 : !a.date ? 1 : !b.date ? -1 : a.date < b.date ? 1 : -1));
   return out;
+}
+
+function card(a) {
+  const li = el("li", { class: "card" });
+  const { g } = gallery(a, false);
+  g.appendChild(el("span", { class: "pill src" }, SRC[a.src].name));
+  const on = isFav(a.id);
+  const heart = el("button", { type: "button", class: "heart", "aria-pressed": String(on), "aria-label": (on ? "Retirer des coups de cœur : " : "Ajouter aux coups de cœur : ") + a.title }, on ? "♥" : "♡");
+  heart.addEventListener("click", (e) => { e.stopPropagation(); toggleFav(a.id); const now = isFav(a.id); heart.setAttribute("aria-pressed", String(now)); heart.textContent = now ? "♥" : "♡"; if (f.favOnly) render(); });
+  g.appendChild(heart);
+  g.querySelector(".track").addEventListener("click", () => openSheet(a.id));
+  const body = el("button", { type: "button", class: "cardbody", "aria-label": "Voir la fiche : " + a.title });
+  body.appendChild(el("span", { class: "t" }, a.title));
+  body.appendChild(el("span", { class: "p" }, euros(a.price)));
+  const meta = el("span", { class: "m" });
+  if (a.date) { const d = daysOld(a.date); if (d <= 7) { meta.appendChild(el("span", { class: "new" }, d <= 0 ? "Aujourd'hui" : d === 1 ? "Hier" : "Il y a " + d + " j")); meta.appendChild(document.createTextNode(" · ")); } }
+  meta.appendChild(document.createTextNode(where(a) + " · " + (a.pro ? "Pro" : "Particulier")));
+  body.appendChild(meta);
+  body.addEventListener("click", () => openSheet(a.id));
+  li.appendChild(g); li.appendChild(body);
+  return li;
 }
 
 function render() {
   chips("types", TYPES, (k) => f.type === k, (k) => { f.type = k; });
   chips("styles", STYLES, (k) => f.styles.includes(k), (k) => { const i = f.styles.indexOf(k); if (i >= 0) f.styles.splice(i, 1); else f.styles.push(k); });
+  const counts = {}; ADS.forEach((a) => { if (matches(a, true)) counts[a.src] = (counts[a.src] || 0) + 1; });
+  chips("sources", Object.keys(SRC).filter((k) => ADS.some((a) => a.src === k)).map((k) => [k, SRC[k].name, counts[k] || 0]), (k) => f.sources.includes(k), (k) => { const i = f.sources.indexOf(k); if (i >= 0) f.sources.splice(i, 1); else f.sources.push(k); });
   store.set("chineuse.filters", f);
   const res = filtered();
   $("count").textContent = res.length + (res.length > 1 ? " annonces" : " annonce");
   const list = $("list"); list.textContent = "";
   if (!res.length) {
-    const li = el("li"); li.appendChild(el("p", { class: "empty" }, f.favOnly && !favs.length ? "Aucun coup de cœur pour l'instant. Touchez le cœur d'une annonce pour la garder ici." : "Aucune annonce ne correspond. Élargissez la zone, le prix ou les styles."));
+    const li = el("li"); li.appendChild(el("p", { class: "empty" }, f.favOnly && !favs.length ? "Aucun coup de cœur pour l'instant. Touchez le cœur d'une annonce pour la garder ici." : "Aucune annonce ne correspond. Élargissez la zone, le prix, les styles ou les sites."));
     list.appendChild(li);
   }
-  res.slice(0, shown).forEach((a) => {
-    const li = el("li", { class: "ad" });
-    const link = el("a", { href: "https://www.leboncoin.fr/ad/ameublement/" + a.id, target: "_blank", rel: "noopener" });
-    if (a.img) { const im = el("img", { class: "ph", alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer", width: "84", height: "84" }); im.src = a.img; link.appendChild(im); }
-    else link.appendChild(el("span", { class: "ph" }));
-    link.appendChild(el("span", { class: "t" }, a.title));
-    link.appendChild(el("span", { class: "p" }, a.price > 0 ? a.price.toLocaleString("fr-FR") + " €" : "Prix à voir"));
-    const meta = el("span", { class: "m" });
-    const d = daysOld(a.date);
-    if (d <= 7) { meta.appendChild(el("span", { class: "new" }, d <= 0 ? "Aujourd'hui" : d === 1 ? "Hier" : "Il y a " + d + " j")); meta.appendChild(document.createTextNode(" · ")); }
-    meta.appendChild(document.createTextNode(a.city + (a.km != null && a.city !== "Bordeaux" ? " (" + a.km + " km)" : "") + " · " + (a.pro ? "Pro" : "Particulier") + " · Leboncoin" + (d > 7 ? " · " + frDate(a.date) : "")));
-    link.appendChild(meta);
-    const on = favs.includes(a.id);
-    const fav = el("button", { type: "button", class: "fav", "aria-pressed": String(on), "aria-label": (on ? "Retirer des coups de cœur : " : "Ajouter aux coups de cœur : ") + a.title }, on ? "♥" : "♡");
-    fav.addEventListener("click", () => { const i = favs.indexOf(a.id); if (i >= 0) favs.splice(i, 1); else favs.push(a.id); store.set("chineuse.coeurs", favs); render(); });
-    li.appendChild(link); li.appendChild(fav); list.appendChild(li);
-  });
+  res.slice(0, shown).forEach((a) => list.appendChild(card(a)));
   $("more").hidden = res.length <= shown;
   renderElse();
 }
 
 function renderElse() {
   const box = $("else"); box.textContent = "";
-  if (f.type === "all") { $("elseNote").textContent = "Choisissez un meuble ci-dessus pour lancer la même recherche sur Marketplace, Vinted, Selency et Label Emmaüs."; return; }
+  if (f.type === "all") { $("elseNote").textContent = "Choisissez un meuble ci-dessus pour lancer la même recherche sur Marketplace et Vinted."; return; }
   const q = f.type + (f.styles.length ? " " + STYLE_WORD[f.styles[0]] : " vintage");
   const e = encodeURIComponent(q), max = parseInt(f.pmax, 10) > 0 ? parseInt(f.pmax, 10) : 0;
-  const sites = [
-    ["Marketplace", "https://www.facebook.com/marketplace/bordeaux/search?query=" + e + (max ? "&maxPrice=" + max : "") + "&sortBy=creation_time_descend"],
-    ["Vinted", "https://www.vinted.fr/catalog?search_text=" + e + (max ? "&price_to=" + max : "") + "&order=newest_first"],
-    ["Selency", "https://www.selency.fr/c/meubles/" + SELENCY[f.type] + "?styleTitle=" + (f.styles[0] === "sc" ? "scandinave" : "vintage") + (max ? "&currentPrice=:" + max : "")],
-    ["Label Emmaüs", "https://www.label-emmaus.co/fr/catalogue/?q=" + e]
-  ];
-  sites.forEach(([name, url]) => box.appendChild(el("a", { class: "site", href: url, target: "_blank", rel: "noopener" }, name)));
+  [["Marketplace", "https://www.facebook.com/marketplace/bordeaux/search?query=" + e + (max ? "&maxPrice=" + max : "") + "&sortBy=creation_time_descend"],
+   ["Vinted", "https://www.vinted.fr/catalog?search_text=" + e + (max ? "&price_to=" + max : "") + "&order=newest_first"]]
+    .forEach(([name, url]) => box.appendChild(el("a", { class: "site", href: url, target: "_blank", rel: "noopener" }, name)));
   $("elseNote").textContent = "Recherche lancée : « " + q + " ».";
 }
 
+/* fiche détaillée */
+let current = null;
+function fact(dl, k, v) { if (!v) return; dl.appendChild(el("dt", null, k)); dl.appendChild(el("dd", null, v)); }
+function fillSheet(a) {
+  current = a.id;
+  const box = $("sGal"); box.replaceWith(Object.assign(gallery(a, true).g, { id: "sGal" }));
+  const gal = $("sGal"), track = gal.querySelector(".track");
+  const th = $("sThumbs"); th.textContent = ""; th.hidden = a.imgs.length < 2;
+  a.imgs.forEach((u, i) => {
+    const b = el("button", { type: "button", "aria-label": "Photo " + (i + 1), "aria-current": String(i === 0) });
+    const im = el("img", { alt: "", loading: "lazy", referrerpolicy: "no-referrer" }); im.src = u; b.appendChild(im);
+    b.addEventListener("click", () => track.scrollTo({ left: i * track.clientWidth, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+    th.appendChild(b);
+  });
+  gal.addEventListener("slide", (e) => { [...th.children].forEach((b, i) => b.setAttribute("aria-current", String(i === e.detail))); const b = th.children[e.detail]; if (b) b.scrollIntoView({ block: "nearest", inline: "nearest" }); });
+  const tags = $("sTags"); tags.textContent = "";
+  tags.appendChild(el("span", { class: "tag" }, SRC[a.src].name));
+  a.styles.forEach((s) => { const lab = (STYLES.find((x) => x[0] === s) || [])[1]; if (lab) tags.appendChild(el("span", { class: "tag" }, lab)); });
+  $("sPrice").textContent = euros(a.price);
+  $("sTitle").textContent = a.title;
+  const dl = $("sFacts"); dl.textContent = "";
+  fact(dl, "Lieu", a.km != null ? a.city + (a.zip ? " (" + a.zip + ")" : "") + (a.city !== "Bordeaux" ? " · " + a.km + " km de Bordeaux" : "") : "");
+  fact(dl, "Vendeur", (a.pro ? "Professionnel" : "Particulier") + (a.seller ? " · " + a.seller : ""));
+  fact(dl, "Remise", a.ship);
+  fact(dl, "Publiée le", a.date ? frDate(a.date) : "");
+  a.attrs.forEach(([k, v]) => fact(dl, k, v));
+  const d = $("sDesc"); d.textContent = a.desc || "Pas de description."; d.classList.add("clamp");
+  requestAnimationFrame(() => { $("sMore").hidden = d.scrollHeight <= d.clientHeight + 2; });
+  const on = isFav(a.id); $("sFav").setAttribute("aria-pressed", String(on)); $("sFav").textContent = (on ? "♥" : "♡") + " Coup de cœur";
+  const link = $("sLink");
+  if (a.url) { link.hidden = false; link.href = a.url; link.textContent = "Voir l'annonce sur " + SRC[a.src].name; } else link.hidden = true;
+}
+function openSheet(id) {
+  const a = BY_ID.get(id); if (!a) return;
+  fillSheet(a);
+  $("sheet").hidden = false; $("sheet").scrollTop = 0; document.body.classList.add("locked");
+  try { if (location.hash !== "#a-" + id) history.pushState({ sheet: id }, "", "#a-" + id); } catch (e) {}
+  $("sClose").focus({ preventScroll: true });
+}
+function hideSheet() { $("sheet").hidden = true; document.body.classList.remove("locked"); current = null; }
+function closeSheet() { if (history.state && history.state.sheet) history.back(); else { hideSheet(); try { history.replaceState(null, "", location.pathname); } catch (e) {} } }
+window.addEventListener("popstate", () => { const m = location.hash.match(/^#a-(.+)$/); if (m && BY_ID.has(m[1])) { fillSheet(BY_ID.get(m[1])); $("sheet").hidden = false; document.body.classList.add("locked"); } else { hideSheet(); render(); } });
+$("sClose").addEventListener("click", closeSheet);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
+$("sFav").addEventListener("click", () => { if (!current) return; toggleFav(current); const on = isFav(current); $("sFav").setAttribute("aria-pressed", String(on)); $("sFav").textContent = (on ? "♥" : "♡") + " Coup de cœur"; });
+$("sMore").addEventListener("click", () => { $("sDesc").classList.remove("clamp"); $("sMore").hidden = true; });
+
 function sync() { $("zone").value = f.zone; $("pmax").value = f.pmax; $("sort").value = f.sort; $("q").value = f.q; $("priv").checked = f.priv; $("favOnly").checked = f.favOnly; }
-const bind = (id, ev, key, read) => $(id).addEventListener(ev, (e) => { f[key] = read(e.target); shown = 40; render(); });
+const bind = (id, ev, key, read) => $(id).addEventListener(ev, (e) => { f[key] = read(e.target); shown = 24; render(); });
 bind("zone", "change", "zone", (t) => t.value);
 bind("sort", "change", "sort", (t) => t.value);
 bind("pmax", "input", "pmax", (t) => t.value);
 bind("q", "input", "q", (t) => t.value);
 bind("priv", "change", "priv", (t) => t.checked);
 bind("favOnly", "change", "favOnly", (t) => t.checked);
-$("reset").addEventListener("click", () => { f = Object.assign({}, DEFAULT, { styles: [] }); shown = 40; sync(); render(); });
-$("more").addEventListener("click", () => { shown += 40; render(); });
+$("reset").addEventListener("click", () => { f = Object.assign({}, DEFAULT, { styles: [], sources: [] }); shown = 24; sync(); render(); });
+$("more").addEventListener("click", () => { shown += 24; render(); });
 
-$("stamp").textContent = ADS.length + " annonces Leboncoin autour de Bordeaux, relevées le " + frDate(COLLECTED) + ".";
+const nSrc = new Set(ADS.map((a) => a.src)).size;
+$("stamp").textContent = ADS.length + " annonces de " + nSrc + (nSrc > 1 ? " sites" : " site") + ", relevées le " + frDate(COLLECTED) + ".";
 sync();
 render();
+const start = location.hash.match(/^#a-(.+)$/);
+if (start && BY_ID.has(start[1])) { fillSheet(BY_ID.get(start[1])); $("sheet").hidden = false; document.body.classList.add("locked"); }
 </script>
