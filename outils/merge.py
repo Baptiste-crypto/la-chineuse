@@ -15,6 +15,7 @@ for f in sys.argv[2:]:
             if m: a['id'] = 'emm-' + m.group(1)
         if a['id'] in seen: continue
         seen.add(a['id'])
+        if a.get('o') == 'part': a['seller'] = ''   # pas de nom de particulier dans l'appli
         a['t'] = html.unescape(a.get('t', '')).strip()
         a['desc'] = html.unescape(a.get('desc', '')).strip()
         attrs = []
