@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="La Chineuse">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EEF4F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1E1B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<title>La Chineuse</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Righteous&display=swap">
+<style>
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+
+/* Layout : une colonne pour le pouce. Filtres en pastilles, puis une seule liste d'annonces ; le prix est aligné à droite pour se comparer d'un coup d'œil. */
+:root {
+  --bg: #EEF4F1;
+  --surface: #FFFFFF;
+  --fg: #16302B;
+  --muted: #5A716B;
+  --line: #CFDDD7;
+  --accent: #E3AE1F;      /* jaune formica */
+  --accent-fg: #2A2204;
+  --teak: #99582A;        /* teck */
+  --new: #2F7D62;
+  --font-display: "Righteous", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1E1B; --surface: #172A26; --fg: #E4EEEA; --muted: #9DB3AD; --line: #2B423D;
+    --accent: #EFBE3E; --accent-fg: #231C03; --teak: #D9945E; --new: #6FC7A6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1E1B; --surface: #172A26; --fg: #E4EEEA; --muted: #9DB3AD; --line: #2B423D;
+  --accent: #EFBE3E; --accent-fg: #231C03; --teak: #D9945E; --new: #6FC7A6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.4; }
+.wrap {
+  max-width: 680px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+header h1 { font-family: var(--font-display); font-weight: 400; font-size: 2.1rem; line-height: 1.05; margin: 0; }
+header h1 span { color: var(--teak); }
+header p { margin: 6px 0 0; color: var(--muted); font-size: .9rem; }
+.filters { display: flex; flex-direction: column; gap: 12px; }
+h2 { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin: 0 0 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: inherit; font-size: .95rem; font-weight: 500; min-height: 40px; padding: 0 14px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 700; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid label { display: flex; flex-direction: column; gap: 4px; font-size: .82rem; color: var(--muted); min-width: 0; }
+input[type="number"], input[type="search"], select {
+  font: inherit; color: var(--fg); background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: 10px; min-height: 44px; padding: 0 12px; width: 100%;
+}
+.check { display: flex; align-items: center; gap: 10px; font-size: .95rem; min-height: 40px; }
+.check input { width: 20px; height: 20px; accent-color: var(--teak); }
+:focus-visible { outline: 3px solid var(--teak); outline-offset: 2px; }
+
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--fg); padding-bottom: 6px; }
+.head strong { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; }
+.head button { font: inherit; font-size: .85rem; background: none; border: 0; color: var(--teak); text-decoration: underline; cursor: pointer; min-height: 32px; padding: 0; }
+.list { list-style: none; margin: 0; padding: 0; }
+.ad { display: flex; align-items: stretch; border-bottom: 1.5px solid var(--line); }
+.ad a { flex: 1; min-width: 0; display: grid; grid-template-columns: 84px 1fr auto; align-content: center; gap: 2px 12px; padding: 10px 0; color: var(--fg); text-decoration: none; }
+.ad .ph { grid-row: 1 / span 2; width: 84px; height: 84px; border-radius: 8px; object-fit: cover; background: var(--line); display: block; }
+.ad .t { font-weight: 700; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ad .p { font-weight: 700; font-size: 1.1rem; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.ad .m { grid-column: 2 / -1; align-self: start; color: var(--muted); font-size: .85rem; }
+.ad .new { color: var(--new); font-weight: 700; }
+.ad .fav { font-size: 1.4rem; line-height: 1; background: none; border: 0; color: var(--muted); padding: 0 0 0 12px; min-width: 44px; cursor: pointer; }
+.ad .fav[aria-pressed="true"] { color: var(--teak); }
+.empty { border: 1.5px dashed var(--line); border-radius: 12px; padding: 18px; color: var(--muted); margin: 12px 0 0; }
+.more { font: inherit; font-weight: 700; min-height: 44px; border-radius: 10px; border: 1.5px solid var(--fg); background: transparent; color: var(--fg); cursor: pointer; width: 100%; margin-top: 12px; }
+.else { display: flex; flex-direction: column; gap: 8px; }
+.else .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.site { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border-radius: 8px; background: var(--surface); border: 1.5px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 500; font-size: .92rem; }
+.note { color: var(--muted); font-size: .85rem; margin: 0; }
+
+.lock { max-width: 420px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 18vh 40px; display: flex; flex-direction: column; gap: 14px; }
+.lock h1 { font-family: var(--font-display); font-weight: 400; font-size: 2.3rem; margin: 0; }
+.lock h1 span { color: var(--teak); }
+.lock p { margin: 0; color: var(--muted); }
+.lock form { display: flex; flex-direction: column; gap: 12px; }
+.lock input { font: inherit; color: var(--fg); background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; min-height: 48px; padding: 0 12px; width: 100%; }
+.lock button { font: inherit; font-weight: 700; min-height: 48px; border-radius: 10px; border: 0; background: var(--accent); color: var(--accent-fg); cursor: pointer; }
+.lock .err { color: var(--teak); font-weight: 700; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<div class="lock" id="lock" hidden>
+  <h1>La <span>Chineuse</span></h1>
+  <p id="lockMsg">Entrez le mot de passe pour voir les annonces. Il ne sera demandé qu'une fois sur ce téléphone.</p>
+  <form id="lockForm">
+    <input type="password" id="pw" autocomplete="current-password" aria-label="Mot de passe" placeholder="Mot de passe" required>
+    <button type="submit" id="unlock">Ouvrir</button>
+  </form>
+  <p class="err" id="lockErr" role="alert"></p>
+</div>
+<div id="app" hidden>
+<div class="wrap">
+  <header>
+    <h1>La <span>Chineuse</span></h1>
+    <p id="stamp"></p>
+  </header>
+
+  <div class="filters">
+    <div>
+      <h2>Meuble</h2>
+      <div class="chips" id="types"></div>
+    </div>
+    <div>
+      <h2>Style ou époque</h2>
+      <div class="chips" id="styles"></div>
+    </div>
+    <div class="grid">
+      <label for="zone">Zone
+        <select id="zone">
+          <option value="all">Tout le secteur</option>
+          <option value="20">À moins de 20 km</option>
+          <option value="10">À moins de 10 km</option>
+          <option value="bdx">Bordeaux seulement</option>
+        </select>
+      </label>
+      <label for="pmax">Prix maxi (€)<input type="number" id="pmax" inputmode="numeric" min="0" placeholder="Sans limite"></label>
+      <label for="sort">Tri
+        <select id="sort">
+          <option value="date">Plus récentes</option>
+          <option value="asc">Prix croissant</option>
+          <option value="desc">Prix décroissant</option>
+        </select>
+      </label>
+      <label for="q">Mot-clé<input type="search" id="q" placeholder="ex. teck, Mado" autocomplete="off"></label>
+    </div>
+    <label class="check" for="priv"><input type="checkbox" id="priv"> Particuliers uniquement</label>
+    <label class="check" for="favOnly"><input type="checkbox" id="favOnly"> Mes coups de cœur uniquement</label>
+  </div>
+
+  <section>
+    <div class="head">
+      <strong id="count"></strong>
+      <button type="button" id="reset">Réinitialiser les filtres</button>
+    </div>
+    <ul class="list" id="list"></ul>
+    <button type="button" class="more" id="more" hidden>Afficher plus d'annonces</button>
+  </section>
+
+  <section class="else">
+    <h2>Chercher aussi ailleurs</h2>
+    <div class="row" id="else"></div>
+    <p class="note" id="elseNote"></p>
+  </section>
+
+  <p class="note">Les annonces viennent de Leboncoin, relevées à la date indiquée en haut. Une annonce peut avoir été vendue depuis. Le style est déduit du titre et de la description, il peut être approximatif.</p>
+</div>
+</div>
+<script>
+const KEYS = {"v": 1, "iter": 600000, "salt": "1i1Z4homRuPumgzuO0E1aA==", "iv": "byoFwNfTfOFh5id2", "priv": "+isoyjaGZxs+WR8bUW00uqr851g6Iv/1t3hcULoLNilQlAupaFeWpaw6iWWOnrCqPBrH2ohjpNjn/RyrOQytlIakCZsAdMW3gWDfrhCG6SpXAnFgVLoJ8P+5zL4TDnVYGeGW6AUH2WtLzIy4DJHHx98E6nihoipXHty3wH4vhVuT21ct9f0P4Rrpl38pdB5bArzrvv2h2Xqg2ifDdiLItf3494js60cOXTTSpVTEqB785y/5ioT8AIwSn/3J703Q87iB16l2AScNrMYYBSsSrh+MXjXZVG3tbFA5NkL4PwtrZiFREmgpDvvdkSKxZkyZmNm5OPfyp5GTC+LclTqLvIrZjPZFXN6CVED7MdP2h377o+oAR+wmoBI6R3AOvsuYlyVj6nkqji9EvVys9g3VYb4exCidmDThURYOB36PUDRF0h0GGoxBp8kp0nl8M17j3M3eOWl9KzwQqkJ/Ee7MkS0USbm/FrFdf1htRfM3oXfa2blBhThEXsbn2wSpKKDhyCDafb4sStP9v9mtzfP8/b2NlyE2HBuE0K3uTq3Hla7+iECPrbDXVXJJT1vPD2sAAgrFK/7WHQ1CLG+pUlnfHfb+yRwQf1a5gTiT/JTwpZOnE0702ueo93hN7kZObOeBqGKuADf2sqGOAByZuKG1rNH1LqpGDOc9zFuBA1yjHQ6bM3rRniKN/I8mK3dLpgUSGHllhrp//rU6TEmdTfSBr9yW+bkSzCq1mVgRAIAZdLmgdqdZhcJZO/3W/qCx5+E/BXZ2g6ef8cB0LWzy2DtggrZewxWATbyS+DMHriGR8sSKcgsoLiYAjYhfPcTcqE+MGa7LY57cYDWRQU5H0N+hWtVVu3df+1LWbZsbLf75+w6XrcfxgiXsW9o8RVcpwX7rKHQNv1ak6m7YT86Yjor700NI9q4OR1R/aLnJIb1hdmcm9QNlatL5HIMmkKhxsZgRqXXGGi9NRll7hCt96Tw6AcZyD7RCj1w2xpcRrJfEIpbNnYC8UOPACnQf2qpv/Q7YkUnErKl8zCb8uME5VbTHC3qZRFP7fcvxoJvKv2J8vZWgWDJY9UFqxFdVjy7rgv1DhQlOI5jrli+HZHLd21fPOYMZDxWctXnjtSY4FWwypIisX+uq0+h6nHttXkTGiHqHGC9ShGkgJBqmMhOt7K/+30P7Y+dKH6pJdqga1/7GnnLOmo+cje5nnYU3PUdfCoBhVLy8h+f0K9LPcb+KMY5hhseEBDP0l0Rbdz+BVJ5aZwh+cjuj/Ws5QiuIld+zJqj8Vr87eYjuPuXubsfyS6nDGe5Ry8qzsMfjIqT4esEi/bjVtJk6UD6AJ9CW6yR+WNlzwOc62yp0pjpUN2Jgmd4pM8l2tzuS7vrBVqHddZCiLPpC9G7vaES99cDsmC37wIGI/3RXIXJYk30TsSoqUVluoNh1EN//Qmg7QcpSpBHbNnwnqlkiB8C4OsOeQ5S3A9wg2gLAmTpSZuOz60MAtKq8DRCD4gP2Dw9iexI0Yzd0VNzWiLsZSwYajqEi6zbylRdniYAX094ZOSGiyi5WLCzfE9RvpV5ToB4mTkj+XTU4YTHgEn4yoTyyQSVIJILH4EAtS1Z8KyDZI6lKs8l0LqzBUvdALJrgIR9Nrr5LJAHoj/x9"};
+function startApp(RAW) {
+
+const TYPES = [["all", "Tous"], ["buffet", "Buffets"], ["enfilade", "Enfilades"], ["commode", "Commodes"], ["console", "Consoles"]];
+const STYLES = [["60", "Années 60"], ["70", "Années 70"], ["80", "Années 80"], ["sc", "Scandinave"], ["fo", "Formica"]];
+const STYLE_WORD = { "60": "années 60", "70": "années 70", "80": "années 80", sc: "scandinave", fo: "formica" };
+const SELENCY = { buffet: "meuble-de-rangement/buffet", enfilade: "meuble-de-rangement/enfilade", commode: "meuble-de-rangement/commode", console: "table/console" };
+
+const COLLECTED = RAW.collected;
+const ADS = RAW.ads.map((a) => ({ id: String(a.id), price: a.p || 0, city: a.c, km: a.km, date: a.d, pro: a.o === "pro", types: a.ty, styles: a.st, title: a.t, img: /^data:image\/webp;base64,/.test(a.img || "") ? a.img : "" }));
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const DEFAULT = { type: "all", styles: [], zone: "all", pmax: "", sort: "date", q: "", priv: false, favOnly: false };
+let f = Object.assign({}, DEFAULT, store.get("chineuse.filters", {}));
+if (!["all", "20", "10", "bdx"].includes(f.zone)) f.zone = "all";
+let favs = store.get("chineuse.coeurs", []);
+let shown = 40;
+const $ = (id) => document.getElementById(id);
+const el = (tag, props, text) => { const n = document.createElement(tag); if (props) for (const k in props) n.setAttribute(k, props[k]); if (text != null) n.textContent = text; return n; };
+const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const frDate = (iso) => { const [y, m, d] = iso.split("-"); return d + "/" + m + "/" + y; };
+const daysOld = (iso) => Math.round((new Date(COLLECTED) - new Date(iso)) / 864e5);
+
+function chips(boxId, items, isOn, onTap) {
+  const box = $(boxId); box.textContent = "";
+  items.forEach(([key, label]) => {
+    const b = el("button", { type: "button", class: "chip", "aria-pressed": String(isOn(key)) }, label);
+    b.addEventListener("click", () => { onTap(key); shown = 40; render(); });
+    box.appendChild(b);
+  });
+}
+
+function filtered() {
+  const q = norm(f.q.trim());
+  const max = parseInt(f.pmax, 10);
+  let out = ADS.filter((a) =>
+    (f.type === "all" || a.types.includes(f.type)) &&
+    (!f.styles.length || f.styles.some((s) => a.styles.includes(s))) &&
+    (f.zone === "all" || (f.zone === "bdx" ? a.city === "Bordeaux" : a.km != null && a.km <= parseInt(f.zone, 10))) &&
+    (!(max > 0) || a.price <= max) &&
+    (!f.priv || !a.pro) &&
+    (!f.favOnly || favs.includes(a.id)) &&
+    (!q || norm(a.title + " " + a.city).includes(q)));
+  if (f.sort === "asc") out.sort((a, b) => a.price - b.price);
+  else if (f.sort === "desc") out.sort((a, b) => b.price - a.price);
+  else out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  return out;
+}
+
+function render() {
+  chips("types", TYPES, (k) => f.type === k, (k) => { f.type = k; });
+  chips("styles", STYLES, (k) => f.styles.includes(k), (k) => { const i = f.styles.indexOf(k); if (i >= 0) f.styles.splice(i, 1); else f.styles.push(k); });
+  store.set("chineuse.filters", f);
+  const res = filtered();
+  $("count").textContent = res.length + (res.length > 1 ? " annonces" : " annonce");
+  const list = $("list"); list.textContent = "";
+  if (!res.length) {
+    const li = el("li"); li.appendChild(el("p", { class: "empty" }, f.favOnly && !favs.length ? "Aucun coup de cœur pour l'instant. Touchez le cœur d'une annonce pour la garder ici." : "Aucune annonce ne correspond. Élargissez la zone, le prix ou les styles."));
+    list.appendChild(li);
+  }
+  res.slice(0, shown).forEach((a) => {
+    const li = el("li", { class: "ad" });
+    const link = el("a", { href: "https://www.leboncoin.fr/ad/ameublement/" + a.id, target: "_blank", rel: "noopener" });
+    if (a.img) { const im = el("img", { class: "ph", alt: "", loading: "lazy", width: "84", height: "84" }); im.src = a.img; link.appendChild(im); }
+    else link.appendChild(el("span", { class: "ph" }));
+    link.appendChild(el("span", { class: "t" }, a.title));
+    link.appendChild(el("span", { class: "p" }, a.price > 0 ? a.price.toLocaleString("fr-FR") + " €" : "Prix à voir"));
+    const meta = el("span", { class: "m" });
+    const d = daysOld(a.date);
+    if (d <= 7) { meta.appendChild(el("span", { class: "new" }, d <= 0 ? "Aujourd'hui" : d === 1 ? "Hier" : "Il y a " + d + " j")); meta.appendChild(document.createTextNode(" · ")); }
+    meta.appendChild(document.createTextNode(a.city + (a.km != null && a.city !== "Bordeaux" ? " (" + a.km + " km)" : "") + " · " + (a.pro ? "Pro" : "Particulier") + " · Leboncoin" + (d > 7 ? " · " + frDate(a.date) : "")));
+    link.appendChild(meta);
+    const on = favs.includes(a.id);
+    const fav = el("button", { type: "button", class: "fav", "aria-pressed": String(on), "aria-label": (on ? "Retirer des coups de cœur : " : "Ajouter aux coups de cœur : ") + a.title }, on ? "♥" : "♡");
+    fav.addEventListener("click", () => { const i = favs.indexOf(a.id); if (i >= 0) favs.splice(i, 1); else favs.push(a.id); store.set("chineuse.coeurs", favs); render(); });
+    li.appendChild(link); li.appendChild(fav); list.appendChild(li);
+  });
+  $("more").hidden = res.length <= shown;
+  renderElse();
+}
+
+function renderElse() {
+  const box = $("else"); box.textContent = "";
+  if (f.type === "all") { $("elseNote").textContent = "Choisissez un meuble ci-dessus pour lancer la même recherche sur Marketplace, Vinted, Selency et Label Emmaüs."; return; }
+  const q = f.type + (f.styles.length ? " " + STYLE_WORD[f.styles[0]] : " vintage");
+  const e = encodeURIComponent(q), max = parseInt(f.pmax, 10) > 0 ? parseInt(f.pmax, 10) : 0;
+  const sites = [
+    ["Marketplace", "https://www.facebook.com/marketplace/bordeaux/search?query=" + e + (max ? "&maxPrice=" + max : "") + "&sortBy=creation_time_descend"],
+    ["Vinted", "https://www.vinted.fr/catalog?search_text=" + e + (max ? "&price_to=" + max : "") + "&order=newest_first"],
+    ["Selency", "https://www.selency.fr/c/meubles/" + SELENCY[f.type] + "?styleTitle=" + (f.styles[0] === "sc" ? "scandinave" : "vintage") + (max ? "&currentPrice=:" + max : "")],
+    ["Label Emmaüs", "https://www.label-emmaus.co/fr/catalogue/?q=" + e]
+  ];
+  sites.forEach(([name, url]) => box.appendChild(el("a", { class: "site", href: url, target: "_blank", rel: "noopener" }, name)));
+  $("elseNote").textContent = "Recherche lancée : « " + q + " ».";
+}
+
+function sync() { $("zone").value = f.zone; $("pmax").value = f.pmax; $("sort").value = f.sort; $("q").value = f.q; $("priv").checked = f.priv; $("favOnly").checked = f.favOnly; }
+const bind = (id, ev, key, read) => $(id).addEventListener(ev, (e) => { f[key] = read(e.target); shown = 40; render(); });
+bind("zone", "change", "zone", (t) => t.value);
+bind("sort", "change", "sort", (t) => t.value);
+bind("pmax", "input", "pmax", (t) => t.value);
+bind("q", "input", "q", (t) => t.value);
+bind("priv", "change", "priv", (t) => t.checked);
+bind("favOnly", "change", "favOnly", (t) => t.checked);
+$("reset").addEventListener("click", () => { f = Object.assign({}, DEFAULT, { styles: [] }); shown = 40; sync(); render(); });
+$("more").addEventListener("click", () => { shown += 40; render(); });
+
+$("stamp").textContent = ADS.length + " annonces Leboncoin autour de Bordeaux, relevées le " + frDate(COLLECTED) + ".";
+sync();
+render();
+
+}
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const ub = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const idb = (mode, fn) => new Promise((res, rej) => {
+    let rq; try { rq = indexedDB.open("chineuse", 1); } catch (e) { return rej(e); }
+    rq.onupgradeneeded = () => rq.result.createObjectStore("k");
+    rq.onerror = () => rej(rq.error);
+    rq.onsuccess = () => { const tx = rq.result.transaction("k", mode); const r = fn(tx.objectStore("k")); tx.oncomplete = () => res(r.result); tx.onerror = () => rej(tx.error); };
+  });
+  const loadKey = () => idb("readonly", (s) => s.get("priv")).catch(() => null);
+  const saveKey = (k) => idb("readwrite", (s) => s.put(k, "priv")).catch(() => null);
+  const dropKey = () => idb("readwrite", (s) => s.delete("priv")).catch(() => null);
+  let enc = null;
+  const getEnc = async () => enc || (enc = await (await fetch("data.enc.json", { cache: "no-cache" })).json());
+  async function open(priv) {
+    const e = await getEnc();
+    const raw = await crypto.subtle.decrypt({ name: "RSA-OAEP" }, priv, ub(e.ek));
+    const aes = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: ub(e.iv) }, aes, ub(e.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  function show(data) { $("lock").hidden = true; $("app").hidden = false; startApp(data); }
+  async function unlockWith(pw) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+    const kek = await crypto.subtle.deriveKey({ name: "PBKDF2", salt: ub(KEYS.salt), iterations: KEYS.iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const pkcs8 = await crypto.subtle.decrypt({ name: "AES-GCM", iv: ub(KEYS.iv) }, kek, ub(KEYS.priv));
+    return crypto.subtle.importKey("pkcs8", pkcs8, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["decrypt"]);
+  }
+  $("lockForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const err = $("lockErr"); err.textContent = ""; $("unlock").disabled = true;
+    let priv = null;
+    try { priv = await unlockWith($("pw").value); } catch (e) { err.textContent = "Mot de passe incorrect. Vérifiez les majuscules et réessayez."; }
+    if (priv) {
+      try { const data = await open(priv); await saveKey(priv); $("pw").value = ""; show(data); }
+      catch (e) { err.textContent = "Les annonces n'ont pas pu être chargées. Vérifiez la connexion et réessayez."; }
+    }
+    $("unlock").disabled = false;
+  });
+  (async () => {
+    if (!window.crypto || !crypto.subtle) { $("lock").hidden = false; $("lockForm").hidden = true; $("lockMsg").textContent = "Ce navigateur est trop ancien pour ouvrir La Chineuse. Mettez à jour iOS ou utilisez Safari."; return; }
+    const saved = await loadKey();
+    if (saved) { try { show(await open(saved)); return; } catch (e) { if (e && e.name === "OperationError") await dropKey(); else { $("lock").hidden = false; $("lockForm").hidden = true; $("lockMsg").textContent = "Les annonces n'ont pas pu être chargées. Vérifiez la connexion, puis rouvrez l'appli."; return; } } }
+    $("lock").hidden = false;
+  })();
+})();
+</script>
+</body>
+</html>
