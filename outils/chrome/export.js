@@ -1,0 +1,2 @@
+// Télécharge le résultat dans le dossier Téléchargements : chineuse-<site>.json
+(() => { const J = window.__job; if (!J || J.phase !== 'fini') return 'pas fini'; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(J.out)], { type: 'application/json' })); a.download = 'chineuse-' + J.site + '.json'; document.body.appendChild(a); a.click(); return 'exporté chineuse-' + J.site + '.json : ' + J.out.length + ' annonces'; })()

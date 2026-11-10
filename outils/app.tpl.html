@@ -220,8 +220,8 @@ const COLLECTED = RAW.collected;
 const TYPES = [["all", "Tous"], ["buffet", "Buffets"], ["enfilade", "Enfilades"], ["commode", "Commodes"], ["console", "Consoles"]];
 const STYLES = [["60", "Années 60"], ["70", "Années 70"], ["80", "Années 80"], ["sc", "Scandinave"], ["fo", "Formica"]];
 const STYLE_WORD = { "60": "années 60", "70": "années 70", "80": "années 80", sc: "scandinave", fo: "formica" };
-const SRC = { lbc: { name: "Leboncoin", host: /^https:\/\/www\.leboncoin\.fr\// }, sel: { name: "Selency", host: /^https:\/\/www\.selency\.fr\// }, emm: { name: "Label Emmaüs", host: /^https:\/\/www\.label-emmaus\.co\// } };
-const IMG_OK = /^(https:\/\/(img\.leboncoin\.fr|images\.selency\.com|[a-z0-9.-]*label-emmaus\.co|[a-z0-9.-]*cloudfront\.net|[a-z0-9.-]*imgix\.net)\/[^"'<>\s]*|data:image\/webp;base64,[A-Za-z0-9+/=]+)$/;
+const SRC = { lbc: { name: "Leboncoin", host: /^https:\/\/www\.leboncoin\.fr\// }, sel: { name: "Selency", host: /^https:\/\/www\.selency\.fr\// }, emm: { name: "Label Emmaüs", host: /^https:\/\/www\.label-emmaus\.co\// }, fb: { name: "Marketplace", host: /^https:\/\/www\.facebook\.com\/marketplace\/item\/\d+\/$/ } };
+const IMG_OK = /^(https:\/\/(img\.leboncoin\.fr|images\.selency\.com|[a-z0-9.-]*label-emmaus\.co|[a-z0-9.-]*cloudfront\.net|[a-z0-9.-]*imgix\.net|[a-z0-9.-]*fbcdn\.net)\/[^"'<>\s]*|data:image\/webp;base64,[A-Za-z0-9+/=]+)$/;
 
 const ADS = (RAW.ads || []).map((a) => {
   const src = SRC[a.src] ? a.src : "lbc";
@@ -345,11 +345,10 @@ function render() {
 
 function renderElse() {
   const box = $("else"); box.textContent = "";
-  if (f.type === "all") { $("elseNote").textContent = "Choisissez un meuble ci-dessus pour lancer la même recherche sur Marketplace et Vinted."; return; }
+  if (f.type === "all") { $("elseNote").textContent = "Choisissez un meuble ci-dessus pour lancer la même recherche sur Vinted."; return; }
   const q = f.type + (f.styles.length ? " " + STYLE_WORD[f.styles[0]] : " vintage");
   const e = encodeURIComponent(q), max = parseInt(f.pmax, 10) > 0 ? parseInt(f.pmax, 10) : 0;
-  [["Marketplace", "https://www.facebook.com/marketplace/bordeaux/search?query=" + e + (max ? "&maxPrice=" + max : "") + "&sortBy=creation_time_descend"],
-   ["Vinted", "https://www.vinted.fr/catalog?search_text=" + e + (max ? "&price_to=" + max : "") + "&order=newest_first"]]
+  [["Vinted", "https://www.vinted.fr/catalog?search_text=" + e + (max ? "&price_to=" + max : "") + "&order=newest_first"]]
     .forEach(([name, url]) => box.appendChild(el("a", { class: "site", href: url, target: "_blank", rel: "noopener" }, name)));
   $("elseNote").textContent = "Recherche lancée : « " + q + " ».";
 }
